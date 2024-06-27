@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 109
+
+[tool.flake8]
+max-line-length = 109
+
+[tool.isort]
+profile = "black"
+line_length = 109
+skip_gitignore = true
