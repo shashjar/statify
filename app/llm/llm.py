@@ -1,12 +1,12 @@
 from colorama import Fore
 from dotenv import load_dotenv
-from langchain.chains.api import open_meteo_docs
 from langchain_anthropic import ChatAnthropic
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from prompt import LLM_PROMPT_TEMPLATE
+from prompt import LLM_PROMPT_TEMPLATE, NBA_API_DOCS
 
 load_dotenv()
+
 
 llm = ChatAnthropic(
     model="claude-3-5-sonnet-20240620",
@@ -20,12 +20,12 @@ prompt = ChatPromptTemplate.from_template(LLM_PROMPT_TEMPLATE)
 
 chain = prompt | llm | StrOutputParser()
 
-# e.g. "What is the weather like right now in Vienna in degrees Fahrenheit?"
+# e.g. "Which team was at the top of the NBA standings for the 1991-1992 regular season?"
 user_prompt = input(Fore.MAGENTA + "\nEnter your prompt: ")
 
 llm_output = chain.invoke(
     {
-        "api_docs": open_meteo_docs,
+        "api_docs": NBA_API_DOCS,
         "user_prompt": user_prompt,
     }
 )
