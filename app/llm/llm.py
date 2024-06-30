@@ -1,32 +1,46 @@
 from colorama import Fore
 from dotenv import load_dotenv
+from langchain import hub
+from langchain.agents import AgentExecutor, create_structured_chat_agent
 from langchain_anthropic import ChatAnthropic
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from prompt import LLM_PROMPT_TEMPLATE, NBA_API_DOCS
+from langchain_community.chat_message_histories import ChatMessageHistory
+from tools import tools
 
 load_dotenv()
 
 
+##############################################################
+# DEFINE AGENT EXECUTOR
+##############################################################
+
 llm = ChatAnthropic(
     model="claude-3-5-sonnet-20240620",
-    temperature=0,
+    temperature=0.1,
     max_tokens=1024,
     timeout=None,
     max_retries=2,
 )
 
-prompt = ChatPromptTemplate.from_template(LLM_PROMPT_TEMPLATE)
+prompt = hub.pull("hwchase17/structured-chat-agent")
 
-chain = prompt | llm | StrOutputParser()
+agent = create_structured_chat_agent(llm, tools, prompt)
 
-# e.g. "Which team was at the top of the NBA standings for the 1991-1992 regular season?"
-user_prompt = input(Fore.MAGENTA + "\nEnter your prompt: ")
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
-llm_output = chain.invoke(
-    {
-        "api_docs": NBA_API_DOCS,
-        "user_prompt": user_prompt,
-    }
-)
-print(Fore.CYAN + f"\n{llm_output}")
+
+##############################################################
+# RUN CHAT
+##############################################################
+
+chat_history = ChatMessageHistory()
+while True:
+    user_input = input(Fore.MAGENTA + "\nEnter your prompt: ")
+    chat_history.add_user_message(user_input)
+
+    llm_output = agent_executor.invoke(
+        {
+            "input": user_input,
+            "chat_history": chat_history.messages,
+        }
+    )
+    chat_history.add_ai_message(llm_output["output"])
