@@ -4,7 +4,7 @@ import NavBar from "./NavBar";
 import ChatMessages from "./ChatMessages";
 import ChatBox from "./ChatBox";
 import { ChatMessage } from "../types";
-import axios from "axios";
+import api from "../api";
 
 const Chat: React.FC = () => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -22,13 +22,13 @@ const Chat: React.FC = () => {
   const chatWithAI = async (userInput: string): Promise<string> => {
     try {
       // TODO: set base URL using environment variable for dev & prod
-      const response = await axios.post("http://127.0.0.1:8000/chat", {
+      const response = await api.post("/chat", {
         userInput,
       });
       return response.data.aiResponse;
     } catch (error) {
       console.error("There was a problem with the Axios request:", error);
-      return "";
+      return "I'm undergoing self-actualization at the present moment. Please try again later.";
     }
   };
 
