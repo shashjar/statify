@@ -5,6 +5,8 @@ anthropic==0.30.0
 anyio==4.4.0
 asgiref==3.8.1
 attrs==23.2.0
+beautifulsoup4==4.12.3
+bs4==0.0.2
 certifi==2024.6.2
 charset-normalizer==3.3.2
 colorama==0.4.6
@@ -16,6 +18,7 @@ django-cors-headers==4.4.0
 filelock==3.15.4
 frozenlist==1.4.1
 fsspec==2024.6.0
+google_search_results==2.4.2
 h11==0.14.0
 httpcore==1.0.5
 httpx==0.27.0
@@ -35,6 +38,7 @@ load-dotenv==0.1.0
 marshmallow==3.21.3
 multidict==6.0.5
 mypy-extensions==1.0.0
+numexpr==2.10.1
 numpy==1.26.4
 orjson==3.10.5
 packaging==24.1
@@ -44,6 +48,7 @@ python-dotenv==1.0.1
 PyYAML==6.0.1
 requests==2.32.3
 sniffio==1.3.1
+soupsieve==2.5
 SQLAlchemy==2.0.31
 sqlparse==0.5.0
 tenacity==8.4.2

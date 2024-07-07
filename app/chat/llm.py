@@ -2,9 +2,10 @@ from dotenv import load_dotenv
 from langchain import hub
 from langchain.agents import AgentExecutor, create_structured_chat_agent
 from langchain_anthropic import ChatAnthropic
+from langchain_community.agent_toolkits.load_tools import load_tools
 from langchain_community.chat_message_histories import ChatMessageHistory
 
-from .tools import tools
+from .tools import AUXILIARY_TOOLS, CUSTOM_TOOLS
 
 
 class StatifyAgent:
@@ -20,6 +21,8 @@ class StatifyAgent:
             max_retries=2,
         )
         prompt = hub.pull("hwchase17/structured-chat-agent")
+        tools = CUSTOM_TOOLS + load_tools(AUXILIARY_TOOLS, llm=llm)
+
         agent = create_structured_chat_agent(llm, tools, prompt)
         self.agent_executor = AgentExecutor(
             agent=agent, tools=tools, verbose=True, handle_parsing_errors=True
