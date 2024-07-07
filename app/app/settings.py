@@ -25,7 +25,11 @@ SECRET_KEY = "django-insecure-c-2(0@qmd+0^t6sbme45@%rv74dh_3w7-cgi&5-*!*^!l^#1@f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "app-1387826425-choreo-internal.dp-development-statify-45708-942600477",
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
