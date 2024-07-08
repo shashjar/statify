@@ -14,9 +14,6 @@ def search_statmuse(statmuse_query: str) -> str:
     """
     url = f"https://www.statmuse.com/nba/ask/{statmuse_query}"
     page = requests.get(url)
-
-    with open("page_content.txt", "w") as f:
-        f.write(str(page.content))
     soup = BeautifulSoup(page.content, "html.parser")
     return soup.find("meta", property="og:description")["content"]
 
