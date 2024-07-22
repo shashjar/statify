@@ -1,6 +1,5 @@
 import React from "react";
 import { Group, Textarea, ActionIcon, rem } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { IconCalculator, IconSend } from "@tabler/icons-react";
 
 interface ChatBoxProps {
@@ -18,19 +17,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   textAreaRef,
   isLoading,
 }) => {
-  const handleCalculatorIconClick = () => {
-    notifications.show({
-      title: "This is awkward...",
-      message: "That one's readonly 🤥",
-      autoClose: 3000,
-      withBorder: true,
-    });
-  };
   const calculatorIcon = (
-    <IconCalculator
-      style={{ width: rem(16), height: rem(16) }}
-      onClick={handleCalculatorIconClick}
-    />
+    <IconCalculator style={{ width: rem(16), height: rem(16) }} />
   );
 
   return (
