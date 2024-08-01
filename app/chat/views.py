@@ -1,6 +1,6 @@
 import json
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators.http import require_http_methods
 
 from .llm import StatifyAgent
@@ -14,7 +14,10 @@ def chat_with_ai(request):
 
     user_input = data.get("userInput")
     agent = StatifyAgent()
-    # TODO: update this to take message history, not just the single latest message
-    llm_output = agent.run(user_input)
 
-    return JsonResponse({"aiResponse": llm_output}, status=200)
+    # TODO: update this to take message history, not just the single latest message
+    def response_generator():
+        for token in agent.stream(user_input):
+            yield f"data: {json.dumps({'token': token})}\n\n"
+
+    return StreamingHttpResponse(response_generator(), content_type="text/event-stream")
