@@ -4,7 +4,7 @@ import NavBar from "./NavBar";
 import ChatMessages from "./ChatMessages";
 import ChatBox from "./ChatBox";
 import { ChatMessage } from "../types";
-import api from "../api";
+import { streamingAPI } from "../api";
 
 const Chat: React.FC = () => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -19,16 +19,64 @@ const Chat: React.FC = () => {
       behavior: "smooth",
     });
 
-  const chatWithAI = async (userInput: string): Promise<string> => {
+  const chatWithAI = async (
+    userInput: string,
+    onToken: (token: string) => void,
+  ): Promise<void> => {
     try {
-      // TODO: set base URL using environment variable for dev & prod
-      const response = await api.post("/chat", {
-        userInput,
-      });
-      return response.data.aiResponse;
+      const response = await streamingAPI.post(
+        "/chat",
+        {
+          userInput,
+        },
+        {
+          responseType: "stream",
+        },
+      );
+
+      if (response.status !== 200) {
+        throw new Error(`HTTP error with status code: ${response.status}`);
+      }
+
+      const reader = response.data.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data:")) {
+            try {
+              const jsonData = JSON.parse(line.slice(6));
+              onToken(jsonData.token);
+            } catch (e) {
+              console.error("Error parsing JSON:", e);
+            }
+          }
+        }
+      }
+
+      if (buffer.startsWith("data:")) {
+        try {
+          const jsonData = JSON.parse(buffer.slice(6));
+          onToken(jsonData.token);
+        } catch (e) {
+          console.error("Error parsing JSON:", e);
+        }
+      }
     } catch (error) {
       console.error("There was a problem with the Axios request:", error);
-      return "I'm undergoing self-actualization at the present moment. Please try again later.";
+      onToken(
+        "I'm undergoing self-actualization at the present moment. Please try again later.",
+      );
     }
   };
 
@@ -44,10 +92,26 @@ const Chat: React.FC = () => {
       event.preventDefault();
 
       textAreaRef.current!.value = "";
-      messages.push({ sender: "user", content: userInput });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: "user", content: userInput },
+      ]);
 
-      const aiResponse = await chatWithAI(userInput);
-      messages.push({ sender: "ai", content: aiResponse });
+      // TODO: add a typing indicator while the AI is "thinking" before the first token arrives
+      const aiResponse: ChatMessage = { sender: "ai", content: "" };
+      setMessages((prevMessages) => [...prevMessages, aiResponse]);
+
+      const onToken = (token: string) => {
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastMessage = updatedMessages[updatedMessages.length - 1];
+          lastMessage.content += token;
+          return updatedMessages;
+        });
+        scrollToBottom();
+      };
+
+      await chatWithAI(userInput, onToken);
 
       setUserInput("");
       setIsLoading(false);
